@@ -1,0 +1,44 @@
+name: topswimmer
+description: "A new Flutter project."
+
+# Prevent accidental publishing to pub.dev.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.4'
+
+dependencies:
+  cloud_firestore: any
+  firebase_core: any
+  firebase_auth: any
+  firebase_auth_web: any
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  get: any
+  intl: any
+  flutter_gen: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: any
+  flutter_launcher_icons: any
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"
+flutter:
+  uses-material-design: true
+
+  # Enable generation of localized Strings from arb files.
+  generate: true
+
+  assets:
+    # Add assets from the images directory to the application.
+    - assets/images/
+    - img/
