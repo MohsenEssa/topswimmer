@@ -1,36 +1,42 @@
-//import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:flutter/material.dart';
 import 'package:topswimmer/login_page.dart';
 import 'package:get/get.dart';
 
 import 'auth/auth_controller.dart';
 
-//Routing: Get provides a simple and intuitive way to handle navigation between screens in your application.
-//It also provides some useful features like named routes and arguments.
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //to make sure that the app is initialized before continuing with the rest of the code.
-  await Firebase.initializeApp().then((value) => Get.put(AuthController()));
-  //initializes Firebase using Firebase.initializeApp() and waits for it
-  //to complete using the await keyword. Once the initialization is complete,
-  //it creates an instance of AuthController and registers it with
-  //the GetX dependency injection system using Get.put(AuthController()).
+
+  // Firebase initialization options for web
+  const firebaseOptionsWeb = FirebaseOptions(
+    apiKey: "AIzaSyDoUJxqnw7A7FfCtw-iJ_M6Ky1Lf6Us5mk",
+    appId: "1:3474585180:web:72460d39586f1225265899",
+    messagingSenderId: "3474585180",
+    projectId: "topswimmerdb",
+  );
+
+
+  // Initialize Firebase based on the platform
+  if (kIsWeb) {
+    await Firebase.initializeApp(options: firebaseOptionsWeb).then((value) => Get.put(AuthController()));
+  } else {
+    await Firebase.initializeApp().then((value) => Get.put(AuthController()));
+  }
+
+  // Register AuthController with GetX
+  Get.put(AuthController());
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      //we used GetMaterialApp instead of MaterialApp
-      //because GetMaterialApp provides some useful features like named routes and arguments.
-      //and that handle navigation between screens in your application.
-
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(

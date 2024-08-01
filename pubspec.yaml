@@ -14,6 +14,7 @@ dependencies:
   firebase_core: any
   firebase_auth: any
   firebase_auth_web: any
+  google_sign_in: any
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -21,6 +22,7 @@ dependencies:
   get: any
   intl: any
   flutter_gen: any
+  iconly: any
 
 dev_dependencies:
   flutter_test:

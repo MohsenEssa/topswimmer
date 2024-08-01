@@ -68,28 +68,6 @@ class _SignUpPageState extends State<SignUpPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            /*Container(
-              /*width: w,
-              height: h * 0.4,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('img/signup.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),*/
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: h * 0.18,
-                  ),
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('img/profile.png'),
-                    backgroundColor: Colors.white70,
-                  )
-                ],
-              ),
-            ),*/
             const Padding(
               padding: EdgeInsets.only(top: 80, right: 100),
               child: Text(

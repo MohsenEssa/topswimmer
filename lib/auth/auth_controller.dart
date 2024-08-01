@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../login_page.dart';
 
 //what is GetxController?
@@ -117,6 +118,22 @@ class AuthController extends GetxController {
           ));
     }
   }
+   static Future<User?> loginWithGoogle() async {
+    final googleAccount = await GoogleSignIn().signIn();
+
+    final googleAuth = await googleAccount?.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+
+    final userCredential = await FirebaseAuth.instance.signInWithCredential(
+      credential,
+    );
+    return userCredential.user;
+  }
+
 
   // Future addUserDetails(
   //     String firstName,
@@ -284,6 +301,7 @@ class AuthController extends GetxController {
 
   void logOut() async {
     await auth.signOut();
+    await GoogleSignIn().signOut();
   }
 
   //By using async and await, the register method waits for the user to be

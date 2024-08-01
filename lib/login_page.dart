@@ -1,13 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:topswimmer/auth/auth_controller.dart';
 import 'package:topswimmer/welcome_page.dart';
-
+import 'package:google_sign_in/google_sign_in.dart';
 import 'home_page.dart';
 import 'GardnerHomePage.dart';
 import 'SellerHomePage.dart';
 import 'ExpertHomePage.dart';
-
+import 'package:iconly/iconly.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -110,10 +111,11 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
-
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
+        
         child: Column(
           children: [
             Container(
@@ -323,6 +325,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
+                      
                     ),
                     SizedBox(height: h * 0.08),
                     RichText(
@@ -352,6 +355,34 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 20.0),
+              child: FilledButton.tonalIcon(
+                onPressed: () async {
+                  try {
+                    final user = await AuthController.loginWithGoogle();
+                    if (user != null && mounted) {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (context) => const HomePage()));
+                    }
+                  } on FirebaseAuthException catch (error) {
+                    print(error.message);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                      error.message ?? "Something went wrong",
+                    )));
+                  } catch (error) {
+                    print(error);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                      error.toString(),
+                    )));
+                  }
+                },
+                icon: const Icon(IconlyLight.login),
+                label: const Text("Continue with Google"),
               ),
             ),
           ],
