@@ -2,17 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'auth/auth_controller.dart';
-import 'login_page.dart';
+import '../login_page.dart';
+import '../add_swimmer.dart';
+import 'Verify_swimmers.dart';
 import 'manage_profile.dart';
 
-class SellerHomePage extends StatelessWidget {
-  const SellerHomePage({super.key});
+class AdminHomePage extends StatelessWidget {
+  const AdminHomePage({super.key, Key? key1});
 
   @override
   Widget build(BuildContext context) {
-    double w = MediaQuery.of(context).size.width;
-    double h = MediaQuery.of(context).size.height;
-
     List<String> images = [
       'img/f.png',
       'img/Instagram_icon.png',
@@ -41,11 +40,11 @@ class SellerHomePage extends StatelessWidget {
                     const Spacer(),
                     GestureDetector(
                       onTap: () {
-                        AuthController().logOut();
-                        Navigator.push(
+                        UserAuthController().logOut();
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
+                            builder: (context) => const AdminHomePage(),
                           ),
                         );
                       },
@@ -86,7 +85,7 @@ class SellerHomePage extends StatelessWidget {
               const Column(
                 children: [
                   Text(
-                    'We provide our Gardners with',
+                    'Welcome Admin! \n',
                     style: TextStyle(
                       fontSize: 25,
                       color: Color.fromARGB(255, 74, 71, 71),
@@ -94,7 +93,7 @@ class SellerHomePage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   Text(
-                    'everything from booking',
+                    'you can verify, add swimmers \n',
                     style: TextStyle(
                       fontSize: 25,
                       color: Color.fromARGB(255, 74, 71, 71),
@@ -102,7 +101,7 @@ class SellerHomePage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   Text(
-                    'gardeners, getting in contact with',
+                    'or many more features\n',
                     style: TextStyle(
                       fontSize: 25,
                       color: Color.fromARGB(255, 74, 71, 71),
@@ -110,15 +109,7 @@ class SellerHomePage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   Text(
-                    'expert advisors, online store, reminders,',
-                    style: TextStyle(
-                      fontSize: 25,
-                      color: Color.fromARGB(255, 74, 71, 71),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    'tips, and plant information.',
+                    'in the future!',
                     style: TextStyle(
                       fontSize: 25,
                       color: Color.fromARGB(255, 74, 71, 71),
@@ -127,7 +118,7 @@ class SellerHomePage extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 180),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -180,7 +171,7 @@ class SellerHomePage extends StatelessWidget {
               accountName: FutureBuilder<DocumentSnapshot>(
                 future: FirebaseFirestore.instance
                     .collection('users')
-                    .doc(AuthController.instance.user?.uid)
+                    .doc(UserAuthController.instance.user?.email)
                     .get(),
                 builder: (BuildContext context,
                     AsyncSnapshot<DocumentSnapshot> snapshot) {
@@ -203,7 +194,7 @@ class SellerHomePage extends StatelessWidget {
                   return const Text('Loading name');
                 },
               ),
-              accountEmail: Text(AuthController.instance.user?.email ?? ''),
+              accountEmail: Text(UserAuthController.instance.user?.email ?? ''),
               currentAccountPicture: const CircleAvatar(
                 backgroundColor: Color.fromARGB(255, 232, 228, 228),
                 child: Icon(
@@ -224,62 +215,25 @@ class SellerHomePage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.people_sharp),
-              title: const Text('Expert Advisor'),
+              leading: const Icon(Icons.verified),
+              title: const Text('Verify Swimmers'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const SellerHomePage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.engineering),
-              title: const Text('Book Gardener'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SellerHomePage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.shopping_basket),
-              title: const Text('Products'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SellerHomePage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.tips_and_updates),
-              title: const Text('Tips'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SellerHomePage()),
+                      builder: (context) => const AdminSwimmerPage()),
                 );
               },
             ),
             ListTile(
               leading: const Icon(Icons.grass),
-              title: const Text('Learn about Plants'),
+              title: const Text('add swimmer'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const SellerHomePage()),
+                  MaterialPageRoute(builder: (context) => const AddSwimmerPage()),
                 );
               },
             ),
@@ -290,7 +244,8 @@ class SellerHomePage extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const EditProfileScreen()),
                 );
               },
             ),

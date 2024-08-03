@@ -1,19 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:topswimmer/reminder_page.dart';
-
+import 'reminder_page.dart';
 import 'auth/auth_controller.dart';
-import 'login_page.dart';
+import '../login_page.dart';
+import '../add_swimmer.dart';
+import 'view_swimmers.dart';
 import 'manage_profile.dart';
+import 'dart:math';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, Key? key1});
 
   @override
   Widget build(BuildContext context) {
-    double w = MediaQuery.of(context).size.width;
-    double h = MediaQuery.of(context).size.height;
-
     List<String> images = [
       'img/f.png',
       'img/Instagram_icon.png',
@@ -42,7 +42,7 @@ class HomePage extends StatelessWidget {
                     const Spacer(),
                     GestureDetector(
                       onTap: () {
-                        AuthController().logOut();
+                        UserAuthController().logOut();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -119,7 +119,7 @@ class HomePage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   Text(
-                    'tips, and plant information.',
+                    'tips, and swimmer information.',
                     style: TextStyle(
                       fontSize: 25,
                       color: Color.fromARGB(255, 74, 71, 71),
@@ -132,18 +132,43 @@ class HomePage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  for (String image in images)
-                    Padding(
+                  GestureDetector(
+                    onTap: () {
+                      // Handle click for the first image (Facebook)
+                      print('Facebook image tapped');
+                      launch(
+                          'https://www.facebook.com/profile.php?id=100094541194009');
+                    },
+                    child: Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: CircleAvatar(
                         radius: 40,
                         backgroundColor: Colors.grey[500],
-                        child: CircleAvatar(
+                        child: const CircleAvatar(
                           radius: 35,
-                          backgroundImage: AssetImage(image),
+                          backgroundImage: AssetImage('img/f.png'),
                         ),
                       ),
                     ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      // Handle click for the second image (Instagram)
+                      print('insta image tapped');
+                      launch('https://www.instagram.com/');
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.grey[500],
+                        child: const CircleAvatar(
+                          radius: 35,
+                          backgroundImage: AssetImage('img/Instagram_icon.png'),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const Spacer(),
@@ -181,7 +206,7 @@ class HomePage extends StatelessWidget {
               accountName: FutureBuilder<DocumentSnapshot>(
                 future: FirebaseFirestore.instance
                     .collection('users')
-                    .doc(AuthController.instance.user?.uid)
+                    .doc(UserAuthController.instance.user?.email)
                     .get(),
                 builder: (BuildContext context,
                     AsyncSnapshot<DocumentSnapshot> snapshot) {
@@ -204,14 +229,48 @@ class HomePage extends StatelessWidget {
                   return const Text('Loading name');
                 },
               ),
-              accountEmail: Text(AuthController.instance.user?.email ?? ''),
-              currentAccountPicture: const CircleAvatar(
-                backgroundColor: Color.fromARGB(255, 232, 228, 228),
-                child: Icon(
-                  Icons.person,
-                  color: Color.fromARGB(255, 125, 123, 123),
-                  size: 35,
-                ),
+              accountEmail: Text(UserAuthController.instance.user?.email ?? ''),
+              // currentAccountPicture: const CircleAvatar(
+              //   backgroundColor: Color.fromARGB(255, 232, 228, 228),
+              //   child: Icon(
+              //     Icons.person,
+              //     color: Color.fromARGB(255, 125, 123, 123),
+              //     size: 35,
+              //   ),
+              // ),
+              currentAccountPicture: FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(UserAuthController.instance.user?.email)
+                    .get(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<DocumentSnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return const CircleAvatar(
+                      backgroundColor: Color.fromARGB(255, 232, 228, 228),
+                      child: Icon(
+                        Icons.person,
+                        color: Color.fromARGB(255, 125, 123, 123),
+                        size: 35,
+                      ),
+                    );
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    final data = snapshot.data?.data() as Map<String, dynamic>;
+                    final photoUrl = data['profile_photo_url'];
+
+                    return CircleAvatar(
+                      backgroundImage:
+                          NetworkImage(photoUrl ?? ''), // Load image from URL
+                    );
+                  }
+
+                  return const CircleAvatar(
+                    backgroundColor: Color.fromARGB(255, 232, 228, 228),
+                    child: CircularProgressIndicator(),
+                  );
+                },
               ),
               decoration: const BoxDecoration(
                 color: Color.fromARGB(255, 93, 172, 96),
@@ -226,12 +285,34 @@ class HomePage extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.alarm),
-              title: const Text('Reminders'),
+              title: const Text('Watering reminders'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SchedulingScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.grass),
+              title: const Text('View Swimmers'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SwimmerPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.grass),
+              title: const Text('add swimmer'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddSwimmerPage()),
                 );
               },
             ),
@@ -250,16 +331,12 @@ class HomePage extends StatelessWidget {
               leading: const Icon(Icons.engineering),
               title: const Text('Book Gardener'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomePage()),
-                );
+
               },
             ),
             ListTile(
               leading: const Icon(Icons.shopping_basket),
-              title: const Text('Products'),
+              title: const Text('Green Store'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -271,22 +348,85 @@ class HomePage extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.tips_and_updates),
               title: const Text('Tips'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomePage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.grass),
-              title: const Text('Learn about Plants'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomePage()),
+              onTap: () async {
+                QuerySnapshot tipsSnapshot =
+                    await FirebaseFirestore.instance.collection('tips').get();
+                List<Map<String, dynamic>> tipsData = tipsSnapshot.docs
+                    .map((doc) => doc.data() as Map<String, dynamic>)
+                    .toList();
+                Map<String, dynamic>? randomTip =
+                    tipsData[Random().nextInt(tipsData.length)];
+
+                showDialog(
+                  context: context,
+                  builder: (context) => Stack(
+                    children: [
+                      // Background overlay
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          color: Colors.black54,
+                        ),
+                      ),
+                      // Dialog content
+                      AlertDialog(
+                        backgroundColor: Colors.transparent,
+                        contentPadding: EdgeInsets.zero,
+                        content: Container(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                randomTip['title'] as String,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 10.0),
+                              Center(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.network(
+                                    randomTip['tipImageURL'] as String,
+                                    width: 300.0,
+                                    height: 200.0,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8.0),
+                              Text(
+                                randomTip['text'] as String,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            style: TextButton.styleFrom(
+                              side: const BorderSide(color: Colors.green),
+                            ),
+                            child: const Text(
+                              'Close',
+                              style: TextStyle(color: Colors.green),
+                            ),
+                          ),
+                        ],
+                        elevation: 0,
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -297,7 +437,8 @@ class HomePage extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const EditProfileScreen()),
                 );
               },
             ),

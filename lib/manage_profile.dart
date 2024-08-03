@@ -81,10 +81,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
-  //final TextEditingController _gardenSizeController = TextEditingController();
-  final TextEditingController _budgetController = TextEditingController();
-  final TextEditingController _categoryController = TextEditingController();
-  final TextEditingController _dropdownController = TextEditingController();
 
   UserProfile? _userProfile;
 
@@ -101,9 +97,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _firstNameController.text = userProfile?.firstName ?? '';
       _lastNameController.text = userProfile?.lastName ?? '';
       _phoneNumberController.text = userProfile?.phoneNumber ?? '';
-      //_gardenSizeController.text = userProfile?.gardenSize ?? '';
-      _budgetController.text = userProfile?.budget ?? '';
-      _categoryController.text = userProfile?.category ?? '';
 
       dropdownValue =
           _findDropdownItem(userProfile?.gardenSize, dropdownItems) ?? '';
@@ -255,45 +248,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 16.0),
             _buildTextField(_phoneNumberController, 'Phone Number'),
             const SizedBox(height: 25.0),
-            const Text(
-              'Size of your garden:',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8.0),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: DropdownButton<String>(
-                value: dropdownValue,
-                onChanged: (String? value) {
-                  setState(() {
-                    dropdownValue = value!;
-                    _dropdownController.text = value;
-                  });
-                },
-                items: dropdownItems.map<DropdownMenuItem<String>>(
-                  (String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  },
-                ).toList(),
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            _buildTextField(_budgetController, 'Budget'),
-            const SizedBox(height: 16.0),
-            _buildTextField(_categoryController, 'Category'),
-            const SizedBox(height: 50.0),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
@@ -328,9 +282,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       firstName: _firstNameController.text,
       lastName: _lastNameController.text,
       phoneNumber: _phoneNumberController.text,
-      gardenSize: _dropdownController.text,
-      budget: _budgetController.text,
-      category: _categoryController.text,
     );
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Profile updated')),

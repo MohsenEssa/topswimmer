@@ -4,76 +4,58 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../login_page.dart';
+import '../admin_home_page.dart';
+import 'dart:io';
+import 'package:topswimmer/home_page.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:path/path.dart' as path;
 
 //what is GetxController?
 //GetxController is a class that will be used to store the data of the user
 
 //AuthController is a class that will be used to store the data of the user
-class AuthController extends GetxController {
-  static AuthController instance = Get
-      .find(); //this line means that we can access the AuthController class from anywhere in our app
-  late Rx<User?>
-      _user; //we used Rx because we want to update the user data in realtime(if the user data changes in the firebase)
-  FirebaseAuth auth = FirebaseAuth
-      .instance; //we used FirebaseAuth to handle the authentication and access alot of properties of firebase auth
+class UserAuthController extends GetxController {
+  static UserAuthController instance = Get.find();
+
+  late Rx<User?> _user;
+  FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   User? get user => _user.value;
+
   @override
   void onReady() {
-    //onReady is a function that will be called when the AuthController class is ready
     super.onReady();
-    _user = Rx<User?>(
-        auth.currentUser); //we initialized the user with the current user
-    _user.bindStream(auth
-        .userChanges()); //if the user logged in or logged or.. the _user will be updated or notfied
-    ever(_user,
-        _initialScreen); //ever is a function that will be called when the _user changes
-    //whenver _user changes like when the user logged in or logged out the _initialScreen function will be called
-    //so _intialScreen will be a listener for _user
-  }
-
-  _initialScreen(User? user) {
-    //this function will be called when the app starts
-    if (user == null) {
-      //if the user is null we will navigate to the login page, null means that the user is not logged in
-      print("login page");
-      Get.offAll(() =>
-          const LoginPage()); //we used Get.offAll to navigate to the login page and remove all the previous pages from the stack
-    } else {
-      //if the user is not null we will navigate to the welcome page
-      //Get.offAll(() => WelcomePage(email: user.email!));
-    }
+    _user = Rx<User?>(auth.currentUser);
+    _user.bindStream(auth.userChanges());
   }
 
   void register(
-      String email,
-      String password,
-      String firstname,
-      String lastname,
-      String phone,
-      String gardenSize,
-      String budget,
-      String category) async {
-    //check if all the fields are not empty including firstname, lastname and phone
+    String email,
+    String password,
+    String firstname,
+    String lastname,
+    String phone,
+
+    bool isAdmin,
+    File? profileImageFile,
+  ) async {
     if (email.isEmpty ||
         password.isEmpty ||
         firstname.isEmpty ||
         lastname.isEmpty ||
-        phone.isEmpty ||
-        gardenSize.isEmpty ||
-        budget.isEmpty ||
-        category.isEmpty) {
+        phone.isEmpty ) {
       Get.snackbar(
-        "About User ",
+        "About User",
         "User message",
         backgroundColor: Colors.redAccent,
         snackPosition: SnackPosition.BOTTOM,
         titleText: const Text(
-          "Account Creation falied, Please fill all the fields",
+          "Account Creation failed",
           style: TextStyle(color: Colors.white),
         ),
         messageText: const Text(
-          "Account Creation falied, Please fill all the fields",
+          "Please fill in all the fields!",
           style: TextStyle(color: Colors.white),
         ),
       );
@@ -81,196 +63,182 @@ class AuthController extends GetxController {
     }
 
     try {
-      //we used async and await because we want to wait for the user to be created
-      await auth.createUserWithEmailAndPassword(
-          email: email, password: password);
+      // Upload the profile photo and get the photo URL
+      String profilePhotoURL = '';
+      if (profileImageFile != null) {
+        profilePhotoURL = await uploadProfilePhotoAndGetURL(profileImageFile);
+      }
 
-      //add user details to firestore
+      await auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
       User? user = auth.currentUser;
       if (user != null) {
-        // User is not null, add user details to firestore
         await addUserDetails(
-          user.uid, // Pass the user's uid as the userId
+          user.uid,
           firstname,
           lastname,
           email,
           phone,
-          gardenSize,
-          budget,
-          category,
+          profilePhotoURL,
+          isAdmin,
         );
       }
-      Navigator.push(
-        Get.context!,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
+      Get.to(() => LoginPage());
+      //Get.to(() => RecommendationPage(userId: user!.uid,));
     } catch (e) {
-      Get.snackbar("About User ", "User message",
-          backgroundColor: Colors.redAccent,
-          snackPosition: SnackPosition.BOTTOM,
-          titleText: const Text(
-            "Account Creation falied",
-            style: TextStyle(color: Colors.white),
-          ),
-          messageText: Text(
-            e.toString(),
-            style: const TextStyle(color: Colors.white),
-          ));
+      Get.snackbar(
+        "About User",
+        "User message",
+        backgroundColor: Colors.redAccent,
+        snackPosition: SnackPosition.BOTTOM,
+        titleText: const Text(
+          "Account Creation failed",
+          style: TextStyle(color: Colors.white),
+        ),
+        messageText: Text(
+          e.toString(),
+          style: const TextStyle(color: Colors.white),
+        ),
+      );
     }
   }
-   static Future<User?> loginWithGoogle() async {
-    final googleAccount = await GoogleSignIn().signIn();
 
-    final googleAuth = await googleAccount?.authentication;
+  Future<bool> checkUser(String? email) async {
+    final DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await FirebaseFirestore.instance.collection("users").doc(email).get();
 
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
-
-    final userCredential = await FirebaseAuth.instance.signInWithCredential(
-      credential,
-    );
-    return userCredential.user;
+    return snapshot.exists;
   }
 
+  Future<bool> checkAdminStatus(String? email) async {
+    try {
+      if (email == null) {
+        print('User email is null');
+        return false;
+      }
 
-  // Future addUserDetails(
-  //     String firstName,
-  //     String lastName,
-  //     String email,
-  //     String phoneNumber,
-  //     String gardenSize,
-  //     String budget,
-  //     String category) async {
-  //   await FirebaseFirestore.instance.collection('users').add({
-  //     'first_name': firstName,
-  //     'last_name': lastName,
-  //     'email': email,
-  //     'phone_number': phoneNumber,
-  //     'garden_size': gardenSize,
-  //     'budget': budget,
-  //     'category': category,
-  //   });
-  // }
+      final QuerySnapshot<Map<String, dynamic>> snapshot =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .where('email', isEqualTo: email)
+              .get();
+      print('isAdmin inside the function: $email');
+      if (snapshot.docs.isNotEmpty) {
+        final Map<String, dynamic> userData = snapshot.docs.first.data();
+        final bool isAdmin = userData['isAdmin'] as bool? ?? false;
+        return isAdmin;
+      } else {}
+    } catch (e, stackTrace) {
+      print('Error checking admin status: $e\n$stackTrace');
+    }
+
+    return false;
+  }
+
   Future<void> addUserDetails(
     String userId,
     String firstName,
     String lastName,
     String email,
     String phoneNumber,
-    String gardenSize,
-    String budget,
-    String category,
+    String profilePhotoURL,
+    bool isAdmin,
   ) async {
-    await FirebaseFirestore.instance.collection('users').doc(userId).set({
+    String documentName = email;
+    DocumentReference userRef =
+        FirebaseFirestore.instance.collection('users').doc(documentName);
+
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await userRef.get() as DocumentSnapshot<Map<String, dynamic>>;
+    if (snapshot.exists) {
+      print('Document $documentName already exists!');
+      return;
+    }
+
+    await userRef.set({
+      'user_id': userId,
       'first_name': firstName,
       'last_name': lastName,
       'email': email,
       'phone_number': phoneNumber,
-      'garden_size': gardenSize,
-      'budget': budget,
-      'category': category,
+      'isAdmin': false,
+      'profile_photo_url': profilePhotoURL,
     });
   }
 
   Future<bool> loginUser(
-      BuildContext context, String email, String password) async {
+    BuildContext context,
+    String email,
+    String password,
+  ) async {
     try {
-      await auth.signInWithEmailAndPassword(email: email, password: password);
-      return true; // Authentication successful
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final User? user = _auth.currentUser;
+      if (await checkUser(email)) {
+        final bool isAdmin =
+            await checkAdminStatus(user!.email); // Check admin status
+        print('isAdmin = $isAdmin');
+        if (isAdmin) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminHomePage()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        }
+        return true;
+      } else {
+        // Code to handle when checkUser returns false
+        // Nothing will execute here if checkUser is false
+        return false;
+      }
     } catch (e) {
-      // Show error message using GetX's snackbar
-      Get.snackbar("About Login", "Login message",
-          backgroundColor: Colors.redAccent,
-          snackPosition: SnackPosition.BOTTOM,
-          titleText: const Text(
-            "Login falied",
-            style: TextStyle(color: Colors.white),
-          ),
-          messageText: Text(
-            e.toString(),
-            style: const TextStyle(color: Colors.white),
-          ));
-      return false; // Authentication failed
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Login Failed"),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0)),
+            content: const Text("No User with these credentials was found!"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  "OK",
+                  style: TextStyle(
+                    color: Colors.green,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+      return false;
     }
   }
 
-  Future<bool> loginExpert(
-      BuildContext context, String email, String password) async {
-    try {
-      await auth.signInWithEmailAndPassword(email: email, password: password);
-      return true; // Authentication successful
-    } catch (e) {
-      // Show error message using GetX's snackbar
-      Get.snackbar("About Login", "Login message",
-          backgroundColor: Colors.redAccent,
-          snackPosition: SnackPosition.BOTTOM,
-          titleText: const Text(
-            "Login falied",
-            style: TextStyle(color: Colors.white),
-          ),
-          messageText: Text(
-            e.toString(),
-            style: const TextStyle(color: Colors.white),
-          ));
-      return false; // Authentication failed
-    }
-  }
-
-  Future<bool> loginSeller(
-      BuildContext context, String email, String password) async {
-    try {
-      await auth.signInWithEmailAndPassword(email: email, password: password);
-      return true; // Authentication successful
-    } catch (e) {
-      // Show error message using GetX's snackbar
-      Get.snackbar("About Login", "Login message",
-          backgroundColor: Colors.redAccent,
-          snackPosition: SnackPosition.BOTTOM,
-          titleText: const Text(
-            "Login falied",
-            style: TextStyle(color: Colors.white),
-          ),
-          messageText: Text(
-            e.toString(),
-            style: const TextStyle(color: Colors.white),
-          ));
-      return false; // Authentication failed
-    }
-  }
-
-  Future<bool> loginGardner(
-      BuildContext context, String email, String password) async {
-    try {
-      await auth.signInWithEmailAndPassword(email: email, password: password);
-      return true; // Authentication successful
-    } catch (e) {
-      // Show error message using GetX's snackbar
-      Get.snackbar("About Login", "Login message",
-          backgroundColor: Colors.redAccent,
-          snackPosition: SnackPosition.BOTTOM,
-          titleText: const Text(
-            "Login falied",
-            style: TextStyle(color: Colors.white),
-          ),
-          messageText: Text(
-            e.toString(),
-            style: const TextStyle(color: Colors.white),
-          ));
-      return false; // Authentication failed
-    }
-  }
-
-  // Update user details in Firestore
   Future<void> updateUserDetails(
     String userId,
     String firstName,
     String lastName,
     String phoneNumber,
     String gardenSize,
-    String budget,
+    int budget,
     String category,
+    bool isAdmin,
   ) async {
     try {
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
@@ -280,6 +248,7 @@ class AuthController extends GetxController {
         'garden_size': gardenSize,
         'budget': budget,
         'category': category,
+        'isAdmin': false,
       });
     } catch (e) {
       Get.snackbar(
@@ -299,13 +268,45 @@ class AuthController extends GetxController {
     }
   }
 
-  void logOut() async {
-    await auth.signOut();
-    await GoogleSignIn().signOut();
+  Future<String> uploadProfilePhotoAndGetURL(File imageFile) async {
+    try {
+      // Generate a unique filename for the image
+      String fileName = path.basename(imageFile.path);
+
+      // Create a reference to the location where the file will be uploaded
+      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+          .ref()
+          .child('profile_photos')
+          .child(fileName);
+
+      // Upload the file to Firebase Storage
+      await ref.putFile(imageFile);
+
+      // Retrieve the download URL for the uploaded file
+      String downloadURL = await ref.getDownloadURL();
+      return downloadURL;
+    } catch (e) {
+      print('Error uploading profile photo: $e');
+      rethrow;
+    }
   }
 
-  //By using async and await, the register method waits for the user to be
-  //created before moving on to the next line of code. This helps to ensure
-  //that the user creation process is completed before any other operations
-  //are performed, such as navigating to a different screen or updating the UI
+  void logOut() async {
+    await auth.signOut();
+  }
+   static Future<User?> loginWithGoogle() async {
+    final googleAccount = await GoogleSignIn().signIn();
+
+    final googleAuth = await googleAccount?.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+
+    final userCredential = await FirebaseAuth.instance.signInWithCredential(
+      credential,
+    );
+    return userCredential.user;
+  }
 }

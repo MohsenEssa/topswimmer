@@ -2,13 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:topswimmer/auth/auth_controller.dart';
-import 'package:topswimmer/welcome_page.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'Customer_signup.dart';
 import 'home_page.dart';
-import 'GardnerHomePage.dart';
-import 'SellerHomePage.dart';
-import 'ExpertHomePage.dart';
+import 'coach_home_page.dart';
 import 'package:iconly/iconly.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -21,12 +19,12 @@ class _LoginPageState extends State<LoginPage> {
   var passwordController = TextEditingController();
 
   String selectedOption = 'User';
-  List<String> options = ['User', 'Seller', 'Gardner', 'Expert'];
+  List<String> options = ['User', 'Seller', 'Coach', 'Expert'];
 
   Future<void> loginUser(String email, String password) async {
     // Authenticate user login
     // Replace this with your authentication logic for the 'User' login option
-    bool isLoggedIn = await AuthController.instance.loginUser(
+    bool isLoggedIn = await UserAuthController.instance.loginUser(
         context, // Pass context here
         email,
         password);
@@ -43,42 +41,15 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> loginSeller(String email, String password) async {
-    // Authenticate seller login
-    // Replace this with your authentication logic for the 'Seller' login option
-    if (email == 'seller@example.com' && password == 'password') {
-      // Seller login successful
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SellerHomePage()),
-      );
-    } else {
-      // Show login error
-    }
-  }
 
-  Future<void> loginGardner(String email, String password) async {
-    // Authenticate gardner login
-    // Replace this with your authentication logic for the 'Gardner' login option
-    if (email == 'gardner@example.com' && password == 'password') {
-      // Gardner login successful
+  Future<void> loginCoach(String email, String password) async {
+    // Authenticate coach login
+    // Replace this with your authentication logic for the 'Coach' login option
+    if (email == 'coach@example.com' && password == 'password') {
+      // Coach login successful
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const GardnerHomePage()),
-      );
-    } else {
-      // Show login error
-    }
-  }
-
-  Future<void> loginExpert(String email, String password) async {
-    // Authenticate expert login
-    // Replace this with your authentication logic for the 'Expert' login option
-    if (email == 'expert@example.com' && password == 'password') {
-      // Expert login successful
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ExpertHomePage()),
+        MaterialPageRoute(builder: (context) => const CoachHomePage()),
       );
     } else {
       // Show login error
@@ -93,14 +64,8 @@ class _LoginPageState extends State<LoginPage> {
       case 'User':
         await loginUser(email, password);
         break;
-      case 'Seller':
-        await loginSeller(email, password);
-        break;
-      case 'Gardner':
-        await loginGardner(email, password);
-        break;
-      case 'Expert':
-        await loginExpert(email, password);
+      case 'Coach':
+        await loginCoach(email, password);
         break;
       default:
         break;
@@ -111,13 +76,13 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
-    
     return Scaffold(
+      
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        
         child: Column(
           children: [
+            const SizedBox(height: 70,),
             Container(
               margin: const EdgeInsets.only(left: 20, right: 20),
               width: w,
@@ -125,28 +90,40 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 60, top: 125),
-                      child: Row(
-                        children: [
-                          const Text(
-                            'Green',
-                            style: TextStyle(
-                              fontFamily: 'Times New Roman',
-                              fontSize: 70,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
+                    Container(
+                      margin: const EdgeInsets.only(left: 20, right: 20),
+                      width: w,
+                      child: Center(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment
+                                    .center, // Center the Row's children
+                                children: [
+                                  const Text(
+                                    'Green',
+                                    style: TextStyle(
+                                      fontFamily: 'Times New Roman',
+                                      fontSize: 70,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 2,
+                                  ),
+                                  Image.asset(
+                                    'img/green-icon2.png',
+                                    width: 50,
+                                    height: 50,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(
-                            width: 2,
-                          ),
-                          Image.asset(
-                            'img/green-icon2.png',
-                            width: 50,
-                            height: 50,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     Text(
@@ -171,6 +148,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ],
                       ),
+                      width: 1000,
                       child: TextField(
                         controller: emailController,
                         decoration: InputDecoration(
@@ -201,6 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 20),
                     Container(
+                      width: 1000,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(30),
@@ -246,6 +225,7 @@ class _LoginPageState extends State<LoginPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
+                        SizedBox(width: w * 0.23),
                         const Text(
                           'Login as:',
                           style: TextStyle(
@@ -284,20 +264,16 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                     Row(
-                      //we created a row to put the forgot password text to the right
-                      //by putting an empty container in the left
                       children: [
-                        Expanded(child: Container()),
-                        const Padding(
-                          padding: EdgeInsets.only(right: 230),
-                          child: Text(
-                            'Forgot Password?',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 15,
-                            ),
+                        SizedBox(width: w * 0.23),
+                        const Text(
+                          'Forgot Password?',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 15,
                           ),
                         ),
+                        Spacer(), // Pushes the text to the left
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -325,7 +301,6 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      
                     ),
                     SizedBox(height: h * 0.08),
                     RichText(
@@ -345,7 +320,7 @@ class _LoginPageState extends State<LoginPage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const WelcomePage(),
+                                    builder: (context) => const SignUpPage(),
                                   ),
                                 );
                               },
@@ -362,7 +337,7 @@ class _LoginPageState extends State<LoginPage> {
               child: FilledButton.tonalIcon(
                 onPressed: () async {
                   try {
-                    final user = await AuthController.loginWithGoogle();
+                    final user = await UserAuthController.loginWithGoogle();
                     if (user != null && mounted) {
                       Navigator.of(context).pushReplacement(MaterialPageRoute(
                           builder: (context) => const HomePage()));

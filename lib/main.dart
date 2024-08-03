@@ -20,13 +20,13 @@ Future<void> main() async {
 
   // Initialize Firebase based on the platform
   if (kIsWeb) {
-    await Firebase.initializeApp(options: firebaseOptionsWeb).then((value) => Get.put(AuthController()));
+    await Firebase.initializeApp(options: firebaseOptionsWeb).then((value) => Get.put(UserAuthController()));
   } else {
-    await Firebase.initializeApp().then((value) => Get.put(AuthController()));
+    await Firebase.initializeApp().then((value) => Get.put(UserAuthController()));
   }
 
   // Register AuthController with GetX
-  Get.put(AuthController());
+  Get.put(UserAuthController());
 
   runApp(const MyApp());
 }
