@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AdminSwimmerPage extends StatefulWidget {
-  const AdminSwimmerPage({Key? key}) : super(key: key);
+  const AdminSwimmerPage({super.key});
 
   @override
   _SwimmerPageState createState() => _SwimmerPageState();
@@ -63,7 +63,7 @@ class _SwimmerPageState extends State<AdminSwimmerPage> {
       setState(() {
         isLoading = false;
       });
-      print('Error fetching swimmers: $e');
+      debugPrint('Error fetching swimmers: $e');
     }
   }
 
@@ -75,7 +75,7 @@ class _SwimmerPageState extends State<AdminSwimmerPage> {
           .update({'Verified': newStatus});
       fetchSwimmers(); // Fetch updated swimmers after the change
     } catch (e) {
-      print('Error changing verified status: $e');
+      debugPrint('Error changing verified status: $e');
     }
   }
 
@@ -84,7 +84,7 @@ class _SwimmerPageState extends State<AdminSwimmerPage> {
       await _firestore.collection('swimmers').doc(swimmerId).delete();
       fetchSwimmers(); // Fetch updated swimmers after the deletion
     } catch (e) {
-      print('Error deleting swimmer: $e');
+      debugPrint('Error deleting swimmer: $e');
     }
   }
 

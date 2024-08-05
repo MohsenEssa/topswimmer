@@ -273,7 +273,7 @@ class _LoginPageState extends State<LoginPage> {
                             fontSize: 15,
                           ),
                         ),
-                        Spacer(), // Pushes the text to the left
+                        const Spacer(), // Pushes the text to the left
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -343,7 +343,7 @@ class _LoginPageState extends State<LoginPage> {
                           builder: (context) => const HomePage()));
                     }
                   } on FirebaseAuthException catch (error) {
-                    print(error.message);
+                    debugPrint(error.message);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text(
                       error.message ?? "Something went wrong",

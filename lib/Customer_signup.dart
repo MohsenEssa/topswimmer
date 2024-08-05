@@ -1,8 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'auth/auth_controller.dart';
 import 'package:iconly/iconly.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -533,7 +531,7 @@ void dispose() {
                                         builder: (context) => const HomePage()));
                                   }
                                 } on FirebaseAuthException catch (error) {
-                                  print(error.message);
+                                  debugPrint(error.message);
                                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                       content: Text(
                                     error.message ?? "Something went wrong",

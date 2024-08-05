@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CoachHomePage extends StatelessWidget {
-  const CoachHomePage({Key? key}) : super(key: key);
+  const CoachHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {

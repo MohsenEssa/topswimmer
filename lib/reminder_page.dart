@@ -59,7 +59,7 @@ class _SchedulingScreenState extends State<SchedulingScreen> {
           reminders = fetchedReminders;
         });
       }).catchError((error) {
-        print('Failed to fetch reminders: $error');
+        debugPrint('Failed to fetch reminders: $error');
       });
     }
   }
@@ -86,10 +86,10 @@ class _SchedulingScreenState extends State<SchedulingScreen> {
             .collection('reminders')
             .add(newReminder)
             .then((value) {
-          print('Reminder added successfully!');
+          debugPrint('Reminder added successfully!');
           _clearForm();
         }).catchError((error) {
-          print('Failed to add reminder: $error');
+          debugPrint('Failed to add reminder: $error');
         });
       }
     }
@@ -105,12 +105,12 @@ class _SchedulingScreenState extends State<SchedulingScreen> {
           .doc(reminders[index]['id'])
           .delete()
           .then((value) {
-        print('Reminder deleted successfully!');
+        debugPrint('Reminder deleted successfully!');
         setState(() {
           reminders.removeAt(index);
         });
       }).catchError((error) {
-        print('Failed to delete reminder: $error');
+        debugPrint('Failed to delete reminder: $error');
       });
     }
   }

@@ -94,7 +94,7 @@ class _AddSwimmerPageState extends State<AddSwimmerPage> {
                 label: const Text('Select Image'),
                 style: ButtonStyle(
                   backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.green),
+                      WidgetStateProperty.all<Color>(Colors.green),
                 ),
               ),
               const SizedBox(height: 10.0),
@@ -407,7 +407,7 @@ class _AddSwimmerPageState extends State<AddSwimmerPage> {
                   onPressed: _submitForm,
                   style: ButtonStyle(
                     backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.green),
+                        WidgetStateProperty.all<Color>(Colors.green),
                   ),
                   child: const Text('Save'),
                 ),

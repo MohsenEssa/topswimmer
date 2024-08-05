@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'auth/auth_controller.dart';
-import '../login_page.dart';
 import '../add_swimmer.dart';
 import 'Verify_swimmers.dart';
 import 'manage_profile.dart';

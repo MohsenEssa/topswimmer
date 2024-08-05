@@ -135,7 +135,7 @@ class HomePage extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       // Handle click for the first image (Facebook)
-                      print('Facebook image tapped');
+                      debugPrint('Facebook image tapped');
                       launch(
                           'https://www.facebook.com/profile.php?id=100094541194009');
                     },
@@ -154,7 +154,7 @@ class HomePage extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       // Handle click for the second image (Instagram)
-                      print('insta image tapped');
+                      debugPrint('insta image tapped');
                       launch('https://www.instagram.com/');
                     },
                     child: Padding(

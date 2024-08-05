@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SwimmerPage extends StatefulWidget {
-  const SwimmerPage({Key? key}) : super(key: key);
+  const SwimmerPage({super.key});
 
   @override
   _SwimmerPageState createState() => _SwimmerPageState();
@@ -74,7 +74,7 @@ class _SwimmerPageState extends State<SwimmerPage> {
       setState(() {
         isLoading = false;
       });
-      print('Error fetching swimmers: $e');
+      debugPrint('Error fetching swimmers: $e');
     }
   }
 
@@ -91,7 +91,7 @@ class _SwimmerPageState extends State<SwimmerPage> {
         });
       }
     } catch (e) {
-      print('Error fetching ownedSwimmerIds: $e');
+      debugPrint('Error fetching ownedSwimmerIds: $e');
     }
   }
 
@@ -117,9 +117,9 @@ class _SwimmerPageState extends State<SwimmerPage> {
 
     try {
       await userRef.update({'ownedSwimmers': ownedSwimmerIds.toList()});
-      print('Successfully updated ownedSwimmers field.');
+      debugPrint('Successfully updated ownedSwimmers field.');
     } catch (e) {
-      print('Error updating ownedSwimmers field: $e');
+      debugPrint('Error updating ownedSwimmers field: $e');
     }
   }
 

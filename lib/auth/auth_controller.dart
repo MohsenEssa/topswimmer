@@ -86,7 +86,7 @@ class UserAuthController extends GetxController {
           isAdmin,
         );
       }
-      Get.to(() => LoginPage());
+      Get.to(() => const LoginPage());
       //Get.to(() => RecommendationPage(userId: user!.uid,));
     } catch (e) {
       Get.snackbar(
